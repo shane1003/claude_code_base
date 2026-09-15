@@ -1,0 +1,13 @@
+# Claude Code personal settings (per-developer, never commit)
+.claude/settings.local.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Claude task handoff (regenerated per task, never commit)
+.claude/HANDOFF.md
