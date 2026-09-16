@@ -1,0 +1,38 @@
+# Claude Code personal settings (per-developer, never commit)
+.claude/settings.local.json
+
+# Claude task handoff (regenerated per task, never commit)
+.claude/HANDOFF.md
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Data, weights, run artifacts — reference by path/hash in configs, never commit
+data/
+weights/
+outputs/
+runs/
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.npz
+
+# Experiment trackers
+wandb/
+mlruns/
+lightning_logs/
+tensorboard/
+
+# Keep small fixtures used by tests
+!tests/fixtures/**
