@@ -8,13 +8,27 @@
 FastAPI backend application managed with `uv`.
 
 ## 1. Build, Run & Test Commands
+
+### Validation — read-only, Claude runs these
+These report problems without editing anything. They are the commands meant by
+"validate" in Section 3.
+- **Run All Tests**: `uv run pytest`
+- **Run Single Test**: `uv run pytest tests/test_users.py -k "test_login"`
+- **Lint Check**: `uv run ruff check .`
+- **Format Check**: `uv run ruff format --check .`
+- **Type Checking**: `uv run mypy .`
+
+### Mutating — the user runs these, Claude must not
+Each rewrites files across the whole repository, including files unrelated to
+the current task. Claude never needs them: the PostToolUse hook already formats
+each file it edits, one file at a time.
+- **Auto-fix lint**: `uv run ruff check --fix .`
+- **Reformat**: `uv run ruff format .`
+
+### Environment
 - **Environment Sync**: `uv sync`
 - **Manage Dependencies**: `uv add <pkg>` or `uv remove <pkg>` (Do NOT edit pyproject.toml manually)
 - **Dev Server**: `uv run uvicorn app.main:app --reload`
-- **Run All Tests**: `uv run pytest`
-- **Run Single Test**: `uv run pytest tests/test_users.py -k "test_login"`
-- **Lint & Format**: `uv run ruff check --fix .` && `uv run ruff format .`
-- **Type Checking**: `uv run mypy .`
 
 ## 2. Architecture Rules (FastAPI)
 - **Directory Layout**:
@@ -34,13 +48,14 @@ FastAPI backend application managed with `uv`.
 1. **Think Before Coding**: Explicitly state assumptions. Ask questions on ambiguity instead of guessing.
 2. **Simplicity First**: Write minimum required code. No overengineering or speculative abstractions.
 3. **Surgical Changes**: Touch ONLY code required for the task. Do NOT refactor/clean adjacent code without permission.
-4. **Goal-Driven Execution**: Validate changes with the test and lint commands in Section 1 before marking complete.
+4. **Goal-Driven Execution**: Validate changes with the **Validation** commands in Section 1 before marking complete. Validation reports; it never rewrites.
 
 ## 4. Never Do
 - Never edit dependency manifests by hand (use the package manager CLI).
 - Never skip, delete, or weaken a failing test to make the suite pass — fix the cause or report it.
 - Never commit secrets, credentials, or large binary files.
 - Never run `git commit` or `git push`. The user commits and pushes manually. Instead, finish every task by overwriting `.claude/HANDOFF.md` (see `.claude/rules/handoff.md`).
+- Never run a repo-wide mutating command as a validation step. `ruff format .` and `ruff check --fix .` rewrite every matching file in the repo, and since ruff 0.14 that includes Python code blocks inside Markdown. Use the read-only Validation commands in Section 1 instead.
 - Never use `--no-verify`, `--force` push, or amend published commits unless explicitly asked.
 - Never write a commit message body: commits are a single subject line only (`git commit -m "TYPE: one sentence"`, see `.claude/rules/commit.md`). No multi-line messages, no extra `-m` flags, no trailers.
 
