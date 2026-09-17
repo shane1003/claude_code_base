@@ -13,7 +13,7 @@ Three rules keep this safe:
 1. Only ever hand a tool a single explicit file path. Never a directory and
    never ``.`` -- a repo-wide run rewrites files that have nothing to do with
    the current task.
-2. Only extensions listed below reach a formatter. Since ruff 0.14,
+2. Only extensions listed below reach a formatter. Since ruff 0.16.0,
    ``ruff format`` also rewrites Python code blocks inside Markdown, so adding
    ``.md`` would let this hook silently edit the rule documents under
    ``.claude/rules/``. Do not add it.

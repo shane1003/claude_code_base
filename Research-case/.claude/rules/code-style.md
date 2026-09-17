@@ -10,7 +10,7 @@ This document outlines the coding standards, formatting guidelines, and research
 - **Indentation**: Use 4 spaces per indentation level. No tabs.
 - **Encoding**: UTF-8 source file encoding.
 - **Notebooks**: Outputs are stripped before commit (`nbstripout`, enforced by hook). Notebooks are for exploration only and are never imported.
-- **Markdown is excluded from ruff**: since ruff 0.14, `ruff format` also rewrites Python code blocks inside `.md` files. `ruff.toml` excludes them so that documentation, including this file, is never silently reformatted. The Python examples below are therefore hand-maintained: keep them formatted correctly by hand.
+- **Markdown is excluded from ruff**: since ruff 0.16.0, `ruff format` also rewrites Python code blocks inside `.md` files. `ruff.toml` excludes them so that documentation, including this file, is never silently reformatted. The Python examples below are therefore hand-maintained: keep them formatted correctly by hand.
 - **Artifact directories are excluded from ruff**: `outputs/`, `data/`, `weights/`, `runs/`, and `checkpoints/` are listed in `ruff.toml` so no tool rewrites a finished run.
 
 ---

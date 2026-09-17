@@ -11,7 +11,7 @@ API-case와 **Section B(공통 규칙)·커밋 규칙·핸드오프 워크플로
 | CLAUDE.md Section A | FastAPI 레이어 규칙 | config-driven 실험, 실험 격리, run 디렉토리, 디바이스 처리 |
 | Never Do 추가 | — | `outputs/`·`data/`·`weights/` 삭제 금지, 지표 변경 시 테스트 필수, 노트북 출력 커밋 금지, 풀 학습 임의 실행 금지 |
 | code-style.md | FastAPI 아키텍처, HTTP 에러 처리 | 텐서 shape 문서화, 재현성(seed), config 구조, 디바이스, 순수 metric 함수, 실패는 크게 |
-| settings.json | — | `nvidia-smi` 허용, `rm -rf`/`rm -r` deny (실험 결과 보호) |
+| settings.json | — | `nvidia-smi` 허용, `rm`과 `Remove-Item` 전면 deny (실험 결과 보호, 별칭 `del`·`rmdir`·`ri` 포함) |
 | hooks/format.py | `.py` → ruff format | + `.ipynb` → nbstripout, `outputs/`·`data/`·`weights/` 경로는 건너뜀 |
 | ruff.toml | `*.md` 제외 | + `outputs/`·`data/`·`weights/`·`runs/`·`checkpoints/` 제외 |
 | CLAUDE.md Section 1 | 검증(읽기 전용) / 변경(사람) 2단 | + 스모크 런 계층 추가. 학습·평가는 GPU 시간과 `outputs/` 쓰기 때문에 사람이 실행 |
@@ -55,16 +55,18 @@ ruff.toml                        # ruff 설정. Markdown·실험 산출물을 �
    우선하므로 그대로 두면 기존 ruff 설정이 조용히 무시됩니다.
 2. `CLAUDE.md` **Section A**의 명령어(`src.train`, `src.eval` 등)와 디렉토리 레이아웃을
    실제 레포 구조에 맞게 교체합니다. **Section B**는 수정하지 않습니다.
-3. 프로젝트에 `nbstripout`을 추가합니다 (`uv add --dev nbstripout`).
-   노트북을 안 쓰면 `hooks/format.py`의 `.ipynb` 분기를 지워도 됩니다.
+3. ruff와 nbstripout을 dev 의존성으로 추가합니다: `uv add --dev ruff nbstripout`.
+   훅은 두 도구를 PATH와 프로젝트 환경에서 찾고, 없으면 **아무 일도 하지 않고 조용히 끝납니다**.
+   ruff를 빼먹으면 포맷 훅이 영원히 무음 no-op이 됩니다.
+   노트북을 안 쓰면 nbstripout은 생략하고 `hooks/format.py`의 `.ipynb` 분기를 지워도 됩니다.
 4. `experiments/LOG.md`를 만들어 두면 `/experiment`가 거기에 기록합니다 (없으면 자동 생성).
 5. 학습 명령을 Claude가 직접 실행하게 하려면 `settings.json` allowlist에
-   `Bash(uv run python -m src.train:*)`를 추가하세요. 기본은 **스모크 런도 권한 프롬프트**를
+   `Bash(uv run python -m src.train:*)`와 `PowerShell(uv run python -m src.train *)`를 쌍으로 추가하세요. 기본은 **스모크 런도 권한 프롬프트**를
    거치도록 열어두지 않았습니다 (GPU 시간 보호).
 
 ## 주의: ruff는 Markdown 안의 Python 코드도 고칩니다
 
-ruff 0.14부터 `ruff format`은 `.md` 파일 안의 Python 코드 블록까지 재작성하고,
+ruff 0.16.0부터 `ruff format`은 `.md` 파일 안의 Python 코드 블록까지 재작성하고,
 `.md`는 기본 탐색 대상에 포함됩니다. 그래서 `ruff format .` 한 번이면
 `.claude/rules/code-style.md` 같은 **규칙 문서가 조용히 수정**됩니다. ruff 0.16.8에서 재현 확인했습니다.
 
@@ -77,13 +79,26 @@ ruff 0.14부터 `ruff format`은 `.md` 파일 안의 Python 코드 블록까지 
 
 CLI 플래그 `--exclude "*.md"`는 **동작하지 않습니다**. 설정 파일에 넣어야 합니다.
 
+## 주의: 권한 deny는 최선 노력이지 방벽이 아닙니다
+
+- `Bash` 도구와 Windows `PowerShell` 도구는 권한 네임스페이스가 다릅니다. `Bash(git commit:*)`만 막으면
+  PowerShell로는 그대로 커밋됩니다. 그래서 모든 allow·deny 규칙을 두 도구에 **쌍으로** 두었습니다.
+  한쪽만 고치면 Windows에서 차단이 풀립니다.
+- Bash 규칙은 **문자열 접두어 비교**입니다. `rm -rf`만 막으면 `rm -fr`, `/bin/rm -rf`,
+  `bash -c "rm -rf ..."`가 통과합니다. 그래서 `Bash(rm *)`로 `rm` 자체를 막았습니다.
+  Claude가 임시 파일 하나를 지우려 해도 막히는데, 이 레포에서는 그게 맞는 기본값입니다.
+- PowerShell 규칙은 cmdlet 별칭을 정규화합니다. `PowerShell(Remove-Item *)` 하나로
+  `rm`, `del`, `rmdir`, `ri`까지 잡힙니다.
+- 그래도 우회는 가능합니다. 산출물의 실제 보호는 훅의 `PROTECTED_DIRS`와 `ruff.toml`의
+  제외 목록, 그리고 CLAUDE.md의 규칙이 담당합니다. deny는 실수를 줄이는 장치입니다.
+
 ## 원칙
 
 - **결과는 config·seed·git hash·데이터 버전으로 추적 가능해야 한다**: 이 넷 중 하나라도 없는 run은 재현 불가로 간주합니다.
 - **검증은 고치지 않는다**: Claude가 돌리는 명령은 읽기 전용이고, 레포 전체를 재작성하는 명령과 GPU를 쓰는 명령은 사람이 실행합니다.
 - **포매터에는 항상 파일 하나만 넘긴다**: 디렉토리나 `.`을 넘기지 않습니다. 실험 산출물은 포매터도 건드리지 못합니다.
 - **지표 코드는 테스트와 함께 움직인다**: metric 함수 변경 = known-answer 테스트 변경. 리뷰어가 CRITICAL로 잡습니다.
-- **실험 결과는 지우지 않는다**: `rm -rf`를 deny하고, `outputs/`는 run별 디렉토리로 격리합니다.
+- **실험 결과는 지우지 않는다**: `rm`과 `Remove-Item`을 두 셸 모두에서 deny하고, 훅과 `ruff.toml`이 산출물 경로를 건너뛰며, `outputs/`는 run별 디렉토리로 격리합니다.
 - **풀 학습은 사람이 시작한다**: Claude는 스모크 런까지만, 명령어를 제시하고 사용자가 실행합니다.
 - **강제할 수 있는 것은 문서가 아니라 훅·권한으로**: 포맷팅은 PostToolUse 훅, 커밋·푸시·삭제 금지는 `settings.json` deny.
 - **커밋·푸시는 사람이**: Claude는 `.claude/HANDOFF.md`를 덮어써서 작업 이력·확인점·커밋 추천을 남기고, 사용자가 그걸 보고 커밋합니다. 사용자가 그 파일에 남긴 메모는 다음 작업의 지시로 읽습니다.

@@ -50,11 +50,20 @@ hook already formats each file it edits, one file at a time.
   - `scripts/`: One-off entry points (data prep, export). Thin wrappers over `src/`.
   - `notebooks/`: Exploration only. Never imported by `src/`. Promote reusable code to `src/`.
   - `tests/`: Fast CPU tests with tiny synthetic tensors. Never trains a real model.
+  - `experiments/LOG.md`: Committed experiment ledger, one row per run (hypothesis, config, seed, git hash, metric). Written by `/experiment`.
   - `data/`, `weights/`, `outputs/`: Git-ignored. Referenced by path + hash/version in configs.
 - **Config-Driven**: No magic numbers. Every knob (lr, batch size, threshold, paths) comes from the config.
 - **Experiment Isolation**: Never edit a baseline config in place. Copy it to a new file (`configs/<date>_<name>.yaml`) and change only what the experiment tests.
 - **Run Artifacts**: Each run writes to `outputs/<date>_<name>/` containing the resolved config, git hash, seed, metrics, and logs. Never overwrite a previous run.
 - **Device Handling**: Select device from config/CLI via `src/utils`. Never hardcode `cuda:0`.
+
+### Never Do (Research-specific)
+These extend the universal list in Section 4 and travel with Section A.
+- Never delete or overwrite files under `outputs/`, `data/`, or `weights/`. Experiment results cannot be regenerated for free. `settings.json` denies `rm` and `Remove-Item` outright; the hook skips these paths too.
+- Never change a metric or evaluation function without adding/updating a known-answer test in `tests/`. A silently changed metric invalidates every past comparison.
+- Never commit notebook outputs, datasets, or checkpoints. Reference them by path and hash.
+- Never hardcode absolute local paths (home directories, drive letters). Paths come from config or env.
+- Never start a full training run without an explicit request. Use the `--debug` smoke run to validate code changes.
 
 <!-- ================================================================== -->
 <!-- SECTION B: UNIVERSAL — copy as-is to any repository.               -->
@@ -71,16 +80,9 @@ hook already formats each file it edits, one file at a time.
 - Never skip, delete, or weaken a failing test to make the suite pass — fix the cause or report it.
 - Never commit secrets, credentials, or large binary files.
 - Never run `git commit` or `git push`. The user commits and pushes manually. Instead, finish every task by overwriting `.claude/HANDOFF.md` (see `.claude/rules/handoff.md`).
-- Never run a repo-wide mutating command as a validation step. `ruff format .` and `ruff check --fix .` rewrite every matching file in the repo, and since ruff 0.14 that includes Python code blocks inside Markdown. Use the read-only Validation commands in Section 1 instead.
+- Never run a repo-wide mutating command as a validation step. `ruff format .` and `ruff check --fix .` rewrite every matching file in the repo, and since ruff 0.16.0 that includes Python code blocks inside Markdown. Use the read-only Validation commands in Section 1 instead.
 - Never use `--no-verify`, `--force` push, or amend published commits unless explicitly asked.
 - Never write a commit message body: commits are a single subject line only (`git commit -m "TYPE: one sentence"`, see `.claude/rules/commit.md`). No multi-line messages, no extra `-m` flags, no trailers.
-
-<!-- Research-specific "Never Do" — these belong to Section A when porting to another case -->
-- Never delete or overwrite files under `outputs/`, `data/`, or `weights/`. Experiment results cannot be regenerated for free.
-- Never change a metric or evaluation function without adding/updating a known-answer test in `tests/`. A silently changed metric invalidates every past comparison.
-- Never commit notebook outputs, datasets, or checkpoints. Reference them by path and hash.
-- Never hardcode absolute local paths (home directories, drive letters). Paths come from config or env.
-- Never start a full training run without an explicit request. Use the `--debug` smoke run to validate code changes.
 
 ## 5. Code Style & Documentation
 - **Readability First**: Clear, simple, self-documenting code over clever/compact syntax.

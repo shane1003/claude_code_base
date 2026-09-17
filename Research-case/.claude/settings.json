@@ -2,22 +2,37 @@
   "permissions": {
     "allow": [
       "Bash(uv sync)",
+      "PowerShell(uv sync)",
       "Bash(uv run pytest:*)",
-      "Bash(uv run ruff:*)",
+      "PowerShell(uv run pytest *)",
+      "Bash(uv run ruff check:*)",
+      "PowerShell(uv run ruff check *)",
+      "Bash(uv run ruff format --check:*)",
+      "PowerShell(uv run ruff format --check *)",
       "Bash(uv run mypy:*)",
+      "PowerShell(uv run mypy *)",
       "Bash(nvidia-smi:*)",
+      "PowerShell(nvidia-smi *)",
       "Bash(git status:*)",
+      "PowerShell(git status *)",
       "Bash(git diff:*)",
+      "PowerShell(git diff *)",
       "Bash(git log:*)",
+      "PowerShell(git log *)",
       "Bash(git branch:*)",
+      "PowerShell(git branch *)",
       "Bash(git show:*)",
-      "Bash(git rev-parse:*)"
+      "PowerShell(git show *)",
+      "Bash(git rev-parse:*)",
+      "PowerShell(git rev-parse *)"
     ],
     "deny": [
       "Bash(git commit:*)",
+      "PowerShell(git commit *)",
       "Bash(git push:*)",
-      "Bash(rm -rf:*)",
-      "Bash(rm -r:*)"
+      "PowerShell(git push *)",
+      "Bash(rm *)",
+      "PowerShell(Remove-Item *)"
     ]
   },
   "hooks": {
