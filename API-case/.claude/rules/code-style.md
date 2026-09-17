@@ -9,7 +9,7 @@ This document outlines the coding standards, formatting guidelines, and architec
 - **Line Length**: Maximum line length is **88 characters** (Black/ruff default; intentionally wider than PEP 8's 79).
 - **Indentation**: Use 4 spaces per indentation level. No tabs.
 - **Encoding**: UTF-8 source file encoding.
-- **Markdown is excluded from ruff**: since ruff 0.14, `ruff format` also rewrites Python code blocks inside `.md` files. `ruff.toml` excludes them so that documentation, including this file, is never silently reformatted. The Python examples below are therefore hand-maintained: keep them formatted correctly by hand.
+- **Markdown is excluded from ruff**: since ruff 0.16.0, `ruff format` also rewrites Python code blocks inside `.md` files. `ruff.toml` excludes them so that documentation, including this file, is never silently reformatted. The Python examples below are therefore hand-maintained: keep them formatted correctly by hand.
 
 ---
 

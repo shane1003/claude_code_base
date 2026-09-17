@@ -1,6 +1,6 @@
 # Ruff configuration.
 #
-# WHY extend-exclude: since ruff 0.14, `ruff format` also rewrites Python code
+# WHY extend-exclude: since ruff 0.16.0, `ruff format` also rewrites Python code
 # blocks inside Markdown files, and `.md` is part of ruff's default file
 # discovery. Without this line a repo-wide `ruff format .` silently edits
 # documentation, including the rule documents under `.claude/rules/` that

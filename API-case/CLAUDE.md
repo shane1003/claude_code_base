@@ -55,7 +55,7 @@ each file it edits, one file at a time.
 - Never skip, delete, or weaken a failing test to make the suite pass — fix the cause or report it.
 - Never commit secrets, credentials, or large binary files.
 - Never run `git commit` or `git push`. The user commits and pushes manually. Instead, finish every task by overwriting `.claude/HANDOFF.md` (see `.claude/rules/handoff.md`).
-- Never run a repo-wide mutating command as a validation step. `ruff format .` and `ruff check --fix .` rewrite every matching file in the repo, and since ruff 0.14 that includes Python code blocks inside Markdown. Use the read-only Validation commands in Section 1 instead.
+- Never run a repo-wide mutating command as a validation step. `ruff format .` and `ruff check --fix .` rewrite every matching file in the repo, and since ruff 0.16.0 that includes Python code blocks inside Markdown. Use the read-only Validation commands in Section 1 instead.
 - Never use `--no-verify`, `--force` push, or amend published commits unless explicitly asked.
 - Never write a commit message body: commits are a single subject line only (`git commit -m "TYPE: one sentence"`, see `.claude/rules/commit.md`). No multi-line messages, no extra `-m` flags, no trailers.
 
