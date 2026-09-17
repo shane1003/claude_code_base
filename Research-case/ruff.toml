@@ -1,0 +1,30 @@
+# Ruff configuration.
+#
+# WHY extend-exclude: since ruff 0.14, `ruff format` also rewrites Python code
+# blocks inside Markdown files, and `.md` is part of ruff's default file
+# discovery. Without this line a repo-wide `ruff format .` silently edits
+# documentation, including the rule documents under `.claude/rules/` that
+# govern how Claude works in this repo. Verified on ruff 0.16.8.
+#
+# NOTE: the CLI flag `--exclude "*.md"` does NOT prevent this. The exclusion
+# has to live in a config file.
+#
+# The artifact directories are listed explicitly as well. Ruff already skips
+# git-ignored paths, but "never touch a finished run" is an inviolable rule in
+# this repo, so it does not depend on `.gitignore` staying correct.
+#
+# NOTE: if this repository already configures ruff in `pyproject.toml`, delete
+# this file and merge `extend-exclude` into the existing `[tool.ruff]` table.
+# A `ruff.toml` takes precedence over `pyproject.toml` and would silently drop
+# the settings already defined there.
+
+line-length = 88
+
+extend-exclude = [
+    "*.md",
+    "outputs/",
+    "data/",
+    "weights/",
+    "runs/",
+    "checkpoints/",
+]

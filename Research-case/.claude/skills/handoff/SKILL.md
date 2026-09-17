@@ -10,9 +10,11 @@ description: Write or refresh .claude/HANDOFF.md (work log, pre-commit checkpoin
    answer it before overwriting.
 2. Inspect the working tree: `git status`, `git diff`, and `git diff --cached`
    if anything is staged. Do NOT run `git commit`, `git push`, or `git add`.
-3. If the verification commands have not been run in this session, run them
-   now (`uv run pytest`, `uv run ruff check .`, `uv run mypy .`) and record
-   the actual result. Never guess.
+3. If the checks have not been run in this session, run the **Validation**
+   commands from CLAUDE.md Section 1 now and record the actual result. Never
+   guess. Use only that list: it is read-only by design, so it cannot add
+   unrelated changes to the diff you are about to describe. Never reach for a
+   mutating command such as `ruff format .` or `ruff check --fix .` here.
 4. **Overwrite** `.claude/HANDOFF.md` using the exact format in
    `.claude/rules/handoff.md`. Fill the header with the current branch and
    timestamp. Put anything long (reasoning, alternatives, TODOs, questions)

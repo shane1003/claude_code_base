@@ -10,16 +10,34 @@ The goal is **reproducible experiments**: every result must be traceable to
 a config, a seed, a data version, and a git commit.
 
 ## 1. Build, Run & Test Commands
-- **Environment Sync**: `uv sync`
-- **Manage Dependencies**: `uv add <pkg>` or `uv remove <pkg>` (Do NOT edit pyproject.toml manually)
-- **Train**: `uv run python -m src.train --config configs/<exp>.yaml`
-- **Evaluate**: `uv run python -m src.eval --config configs/<exp>.yaml --ckpt <path>`
-- **Smoke Run (tiny subset, CPU)**: `uv run python -m src.train --config configs/<exp>.yaml --debug`
+
+### Validation — read-only, Claude runs these
+These report problems without editing anything and without consuming GPU time.
+They are the commands meant by "validate" in Section 3.
 - **Run Tests (fast, CPU-only)**: `uv run pytest`
 - **Run Single Test**: `uv run pytest tests/test_metrics.py -k "test_auc"`
-- **Lint & Format**: `uv run ruff check --fix .` && `uv run ruff format .`
+- **Lint Check**: `uv run ruff check .`
+- **Format Check**: `uv run ruff format --check .`
 - **Type Checking**: `uv run mypy src/`
 - **GPU Check**: `nvidia-smi`
+
+### Smoke Run — cheap, Claude may run to validate a code path
+- **Smoke Run (tiny subset, CPU)**: `uv run python -m src.train --config configs/<exp>.yaml --debug`
+
+### Mutating or expensive — the user runs these, Claude must not
+Claude proposes the exact command and lets the user launch it.
+- **Train**: `uv run python -m src.train --config configs/<exp>.yaml` (GPU hours, writes `outputs/`)
+- **Evaluate**: `uv run python -m src.eval --config configs/<exp>.yaml --ckpt <path>` (writes `outputs/`)
+- **Auto-fix lint**: `uv run ruff check --fix .` (rewrites files repo-wide)
+- **Reformat**: `uv run ruff format .` (rewrites files repo-wide)
+
+The two ruff commands above rewrite every matching file in the repository, not
+just the ones in the current task. Claude never needs them: the PostToolUse
+hook already formats each file it edits, one file at a time.
+
+### Environment
+- **Environment Sync**: `uv sync`
+- **Manage Dependencies**: `uv add <pkg>` or `uv remove <pkg>` (Do NOT edit pyproject.toml manually)
 
 ## 2. Architecture Rules (Research)
 - **Directory Layout**:
@@ -46,13 +64,14 @@ a config, a seed, a data version, and a git commit.
 1. **Think Before Coding**: Explicitly state assumptions. Ask questions on ambiguity instead of guessing.
 2. **Simplicity First**: Write minimum required code. No overengineering or speculative abstractions.
 3. **Surgical Changes**: Touch ONLY code required for the task. Do NOT refactor/clean adjacent code without permission.
-4. **Goal-Driven Execution**: Validate changes with the test and lint commands in Section 1 before marking complete.
+4. **Goal-Driven Execution**: Validate changes with the **Validation** commands in Section 1 before marking complete. Validation reports; it never rewrites files and never spends GPU time.
 
 ## 4. Never Do
 - Never edit dependency manifests by hand (use the package manager CLI).
 - Never skip, delete, or weaken a failing test to make the suite pass — fix the cause or report it.
 - Never commit secrets, credentials, or large binary files.
 - Never run `git commit` or `git push`. The user commits and pushes manually. Instead, finish every task by overwriting `.claude/HANDOFF.md` (see `.claude/rules/handoff.md`).
+- Never run a repo-wide mutating command as a validation step. `ruff format .` and `ruff check --fix .` rewrite every matching file in the repo, and since ruff 0.14 that includes Python code blocks inside Markdown. Use the read-only Validation commands in Section 1 instead.
 - Never use `--no-verify`, `--force` push, or amend published commits unless explicitly asked.
 - Never write a commit message body: commits are a single subject line only (`git commit -m "TYPE: one sentence"`, see `.claude/rules/commit.md`). No multi-line messages, no extra `-m` flags, no trailers.
 
